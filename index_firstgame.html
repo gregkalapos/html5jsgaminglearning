@@ -1,0 +1,119 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>First game</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+    
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+    <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <header>
+    </header>
+    <div id="main" role="main">
+        <canvas id="game" width="600" height="400"></canvas>
+    </div>
+    <footer>
+    </footer>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/vendor/jquery-1.11.3.min.js"><\/script>')
+</script>
+
+<!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+<script>
+    (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
+</script>
+
+<script>
+    var canvas = document.getElementById('game');
+    var context = canvas.getContext('2d');
+    
+    var spaceShip = {
+        x: 100,
+        y: 300,
+        width: 50,
+        height: 50, 
+        counter: 0
+    }
+    
+    var keyboard = {};
+    
+    function drawBackground(){
+        context.fillStyle = '#000000';
+        context.fillRect(0,0,canvas.width, canvas.height);
+    }
+    
+    function drawSpaceShip() {
+        context.fillStyle = 'white';
+        context.fillRect(spaceShip.x, spaceShip.y, spaceShip.width, spaceShip.height);
+    }
+    
+    function updateSpaceship() {
+        //left
+        if(keyboard[37]) {
+            spaceShip.x -= 10;
+            if(spaceShip.x < 0) {
+                spaceShip.x = 0;
+            }
+        }
+        
+        //right
+        if(keyboard[39]) {
+            spaceShip.x += 10;            
+            var right = canvas.width - spaceShip.width;
+            if(spaceShip.x > right) {
+                spaceShip.x = right;
+            }
+        }
+    }
+    
+    function addKeyboardEvents() {
+        addEvent(document, "keydown", function(e){
+           keyboard[e.keyCode] = true; 
+        });
+        
+        addEvent(document, "keyup", function(e){
+           keyboard[e.keyCode] = false; 
+        });
+    }
+    
+    function addEvent(node, name, func) {
+        if(node.addEventListener) {
+            node.addEventListener(name, func, false);
+        } else if(node.attachEvent) {
+            //MS
+            node.attachEvent(name, func);
+        }
+    }
+    
+    function gameLoop() {
+        updateSpaceship();
+        drawBackground();
+        drawSpaceShip();
+    }
+    
+    addKeyboardEvents();
+    setInterval(gameLoop, 1000/60);
+</script>
+
+</html>
