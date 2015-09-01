@@ -1,0 +1,180 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>A Simple Canvas Square</title>
+    <style type="text/css" media="screen">
+        #canvas {
+            border: 1px solid #c0c0c0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="game" width="900" height="600"></canvas>
+    <script>
+        
+        var canvas = document.getElementById('game');
+        var context = canvas.getContext('2d');                       
+        
+        function Ball(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        
+        
+        function Dolphin(x, y, width, height) {
+            this. x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.position = 'up';
+            this.swimround = 0;
+            this.isMoving = false;
+            this.startingRound = 0;
+        }
+        
+        Dolphin.prototype = {
+            constructor: Dolphin,            
+            drawDolphi: function(){
+              
+               // if(!this.isMoving) {
+                //    context.drawImage(orca_swim_taildown, this.x,  this.y);
+               // }
+              // else
+             //  {
+                    if(this.position == 'up') {
+                        context.drawImage(orca_swim_tailup, this.x,  this.y);
+                    }
+                    else if (this.position == 'down') {
+                        context.drawImage(orca_swim_taildown, this.x,  this.y);
+                    }               
+             //  }
+            },
+            
+            updateState: function () {                
+                if(this.isMoving){ //swimming
+                   //left
+                    if(keyboard[37]) {
+                       this.x -= 10;
+                       this.swimround++;
+                       this.isMoving = true;
+                       if(this.x < 0) {
+                         this.x = 0;
+                        }                
+                    }      
+                    else if(keyboard[39]) { ////right                
+                        this.x += 10; 
+               
+                        this.swimround++;     
+                        this.isMoving = true;  
+                
+                        var right = canvas.width - this.width;
+                        if(this.x > right) {
+                            this.x = right;
+                        }
+                    }
+                    else { //not moving
+                        this.isMoving = false;
+                        this.swimround = 0;
+                    }
+                
+                    if(this.swimround == 10) {
+                        if(this.position == 'up') {
+                            this.position = 'down';
+                        }
+                        else if( this.position == 'down') {
+                            this.position = 'up';
+                        }
+                        this.swimround = 0;
+                    } 
+                }
+                else //starting
+                {             
+                    var roundToStart = 5;                    
+                    
+                    if( this.startingRound == 1)
+                     {
+                         this.position = 'up';
+                     }    
+                     
+                     if(this.startingRound == roundToStart - 1)
+                     {
+                          this.position = 'down';
+                     }      
+                 //left
+                 if(keyboard[37]) {
+                     this.startingRound++;                     
+                 }
+                  else if(keyboard[39]) { //right
+                                         
+                      
+                      this.startingRound++;
+                  }                  
+                 else{ //not pressed
+                     this.startingRound = 0;
+                     this.position = 'down';
+                 }
+                 
+                 if(this.startingRound == roundToStart) {
+                     this.isMoving = true;
+                     this.startingRound = 0;
+                 }
+             }       
+         }         
+        }
+  
+	
+    var keyboard = {};   
+      
+    function drawBackground(){
+        context.fillStyle = 'white';
+        context.fillRect(0,0,canvas.width, canvas.height);
+    }
+	
+    function gameLoop() {                
+        drawBackground();
+        dolphin.updateState();
+        dolphin.drawDolphi();
+        //updateDolphin();
+       // drawDolphin();
+    }
+    
+    function loadResources(){
+         orca_swim_taildown = new Image(); 
+         orca_swim_taildown.src = 'imgs/Orca_swim_taildown.png';
+         
+         orca_swim_tailup = new Image();
+         orca_swim_tailup.src = 'imgs/Orca_swim_tailup.png';
+    }
+    
+     function addKeyboardEvents() {
+        addEvent(document, "keydown", function(e){
+           keyboard[e.keyCode] = true; 
+        });
+        
+        addEvent(document, "keyup", function(e){
+           keyboard[e.keyCode] = false; 
+        });
+    }
+    
+    function addEvent(node, name, func) {
+        if(node.addEventListener) {
+            node.addEventListener(name, func, false);
+        } else if(node.attachEvent) {
+            //MS
+            node.attachEvent(name, func);
+        }
+    }
+        
+     var dolphin = new Dolphin(200,200, 50, 50);
+    
+     loadResources();
+     addKeyboardEvents();
+	 setInterval(gameLoop, 1000/60);
+    </script>
+</body>
+
+</html>
