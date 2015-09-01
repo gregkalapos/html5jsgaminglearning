@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>A Simple Canvas Square</title>
+    <title>Dolphin prototype</title>
     <style type="text/css" media="screen">
         #canvas {
             border: 1px solid #c0c0c0;
@@ -19,11 +19,33 @@
         var canvas = document.getElementById('game');
         var context = canvas.getContext('2d');                       
         
-        function Ball(x, y) {
+        function Ball(x, y, angle, speed) {
             this.x = x;
             this.y = y;
+            
+            var scaleX = Math.cos(angle);
+            var scaleY = Math.sin(angle);
+            
+            this.velocityX = (speed * scaleX);
+            this.velocityY = (speed * scaleY);
         }
         
+        
+        Ball.prototype = {
+            constructor: Ball,
+            
+            updateBall: function() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+            },
+            
+            drawBall: function() {
+                context.beginPath();
+                context.fillStyle = "green";
+                context.arc(this.x, this.y, 10, 0, Math.PI * 2, true); 
+                context.fill();
+            }                        
+        }
         
         function Dolphin(x, y, width, height) {
             this. x = x;
@@ -34,27 +56,35 @@
             this.swimround = 0;
             this.isMoving = false;
             this.startingRound = 0;
+            
+            this.firedItems = [];
+            
+            this.isFiring = false;
+            
+            this.fireAngle = 0;
         }
         
         Dolphin.prototype = {
             constructor: Dolphin,            
-            drawDolphi: function(){
-              
-               // if(!this.isMoving) {
-                //    context.drawImage(orca_swim_taildown, this.x,  this.y);
-               // }
-              // else
-             //  {
+            drawDolphin: function(){
+                   
                     if(this.position == 'up') {
                         context.drawImage(orca_swim_tailup, this.x,  this.y);
                     }
                     else if (this.position == 'down') {
                         context.drawImage(orca_swim_taildown, this.x,  this.y);
-                    }               
-             //  }
+                    }     
+                    
+                    //draw balls
+                     this.firedItems.forEach(function(item) {
+                       item.drawBall();
+                     });    
+                     
+                     this.drawAngleHelper();     
             },
             
-            updateState: function () {                
+            updateState: function () {
+                
                 if(this.isMoving){ //swimming
                    //left
                     if(keyboard[37]) {
@@ -93,7 +123,7 @@
                 }
                 else //starting
                 {             
-                    var roundToStart = 5;                    
+                    var roundToStart = 7;                    
                     
                     if( this.startingRound == 1)
                      {
@@ -122,24 +152,61 @@
                      this.isMoving = true;
                      this.startingRound = 0;
                  }
-             }       
-         }         
-        }
-  
-	
+             }
+             
+         //update balls         
+         this.firedItems.forEach(function(item) {
+             item.updateBall();
+         });      
+                    
+         if(keyboard[32]) {
+             if(this.isFiring == false)
+             {             
+                var ball = new Ball(this.x+orca_swim_taildown.width+5, (this.y+orca_swim_taildown.height)-40, this.fireAngle, 2);                    
+                this.firedItems.push(ball);
+                this.isFiring = true;
+             }
+             
+         }
+         if(!keyboard[32]){            
+                 this.isFiring = false;                           
+          } 
+          
+          if(keyboard[38]){ //up
+              this.fireAngle+= 0.05;
+          }         
+          
+          if(keyboard[40]) { //down
+              this.fireAngle -= 0.05;
+          }
+       },
+       
+       drawAngleHelper: function(){               
+        context.beginPath();
+        context.moveTo(this.x+orca_swim_taildown.width+5, (this.y+orca_swim_taildown.height)-40);      
+        var scaleX = Math.cos(this.fireAngle);
+        var scaleY = Math.sin(this.fireAngle);            
+        var vX = (20 * scaleX);
+        var vY = (20 * scaleY);
+                
+        context.lineTo(this.x+orca_swim_taildown.width+5 + vX,  (this.y+orca_swim_taildown.height)-40 + vY);
+        context.stroke();
+       }       
+      }
+  	
     var keyboard = {};   
       
     function drawBackground(){
-        context.fillStyle = 'white';
-        context.fillRect(0,0,canvas.width, canvas.height);
+       // context.fillStyle = 'white';
+        //context.fillRect(0,0,canvas.width, canvas.height);        
+        context.clearRect(0, 0, canvas.width, canvas.height);
     }
 	
     function gameLoop() {                
         drawBackground();
         dolphin.updateState();
-        dolphin.drawDolphi();
-        //updateDolphin();
-       // drawDolphin();
+        dolphin.drawDolphin();        
+    
     }
     
     function loadResources(){
@@ -169,8 +236,8 @@
         }
     }
         
-     var dolphin = new Dolphin(200,200, 50, 50);
-    
+     var dolphin = new Dolphin(10,200, 50, 50);
+         
      loadResources();
      addKeyboardEvents();
 	 setInterval(gameLoop, 1000/60);
